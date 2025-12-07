@@ -1,4 +1,4 @@
-package com.saharsh.soniq.services;
+package com.saharsh.soniq.service;
 
 import com.saharsh.soniq.dto.CreateProjectRequest;
 import com.saharsh.soniq.dto.OwnerResponse;

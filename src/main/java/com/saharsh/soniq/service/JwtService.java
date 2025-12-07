@@ -1,4 +1,4 @@
-package com.saharsh.soniq.services;
+package com.saharsh.soniq.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

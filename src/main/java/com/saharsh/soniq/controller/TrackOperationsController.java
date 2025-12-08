@@ -4,9 +4,11 @@ import com.saharsh.soniq.dto.LockRequest;
 import com.saharsh.soniq.dto.RegionRequest;
 import com.saharsh.soniq.entity.Region;
 import com.saharsh.soniq.entity.Track;
+import com.saharsh.soniq.entity.User;
 import com.saharsh.soniq.service.RegionService;
 import com.saharsh.soniq.service.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,12 +23,14 @@ public class TrackOperationsController {
     }
 
     @PostMapping("/{trackId}/lock")
-    public Track lockTrack(@PathVariable Long trackId, @RequestBody LockRequest request) {
-        return trackService.lockTrack(trackId, request.getUserId());
+    public Track lockTrack(@PathVariable Long trackId, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return trackService.lockTrack(trackId, user.getId());
     }
 
     @PostMapping("/{trackId}/unlock")
-    public Track unlockTrack(@PathVariable Long trackId, @RequestBody LockRequest request) {
-        return trackService.unlockTrack(trackId, request.getUserId());
+    public Track unlockTrack(@PathVariable Long trackId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        return trackService.unlockTrack(trackId, currentUser.getId());
     }
 }

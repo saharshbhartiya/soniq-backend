@@ -1,5 +1,6 @@
 package com.saharsh.soniq.service;
 
+import com.saharsh.soniq.config.WebSocketConfig;
 import com.saharsh.soniq.entity.Project;
 import com.saharsh.soniq.entity.Track;
 import com.saharsh.soniq.entity.User;
@@ -7,6 +8,7 @@ import com.saharsh.soniq.repository.ProjectRepository;
 import com.saharsh.soniq.repository.TrackRepository;
 import com.saharsh.soniq.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ public class TrackService {
     @Autowired private TrackRepository trackRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     public Track addTrackToProject(Long projectId, String trackName) {
@@ -23,7 +26,10 @@ public class TrackService {
         Track newTrack = new Track();
         newTrack.setName(trackName);
         newTrack.setProject(project);
-        return trackRepository.save(newTrack);
+        Track savedTrack = trackRepository.save(newTrack);
+        String destination = "/topic/project/" + projectId;
+        messagingTemplate.convertAndSend(destination , savedTrack);
+        return savedTrack;
     }
 
     @Transactional
@@ -37,7 +43,10 @@ public class TrackService {
             throw new IllegalStateException("Track locked by another user.");
         }
         track.setLockedBy(user);
-        return trackRepository.save(track);
+        Track savedTrack = trackRepository.save(track);
+        String destination = "/topic/project/" + savedTrack.getProject().getId();
+        messagingTemplate.convertAndSend(destination , savedTrack);
+        return savedTrack;
     }
 
     @Transactional
@@ -49,6 +58,9 @@ public class TrackService {
             throw new IllegalStateException("You do not hold the lock.");
         }
         track.setLockedBy(null);
-        return trackRepository.save(track);
+        Track savedTrack = trackRepository.save(track);
+        String destination = "/topic/project/" + savedTrack.getProject().getId();
+        messagingTemplate.convertAndSend(destination , savedTrack);
+        return savedTrack;
     }
 }
